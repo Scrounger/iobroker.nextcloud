@@ -1,0 +1,150 @@
+<html>
+
+<head>
+
+	<!-- Load ioBroker scripts and styles-->
+	<link rel="stylesheet" type="text/css" href="../../css/adapter.css" />
+	<link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
+
+	<script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="../../socket.io/socket.io.js"></script>
+
+	<script type="text/javascript" src="../../js/translate.js"></script>
+	<script type="text/javascript" src="../../lib/js/materialize.js"></script>
+	<script type="text/javascript" src="../../js/adapter-settings.js"></script>
+
+	<!-- Load our own files -->
+	<link rel="stylesheet" type="text/css" href="style.css" />
+	<script type="text/javascript" src="words.js"></script>
+
+	<script type="text/javascript">
+
+		// Create secrect for encrypted password storage
+		var secret;
+		function encrypt(key, value) {
+			var result = '';
+			for (var i = 0; i < value.length; ++i) {
+				result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
+			}
+			return result;
+		}
+		function decrypt(key, value) {
+			var result = '';
+			for (var i = 0; i < value.length; ++i) {
+				result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
+			}
+			return result;
+		}
+
+		function loadHelper(settings, onChange) {
+			// example: select elements with id=key and class=value and insert value
+			if (!settings) return;
+			$('.value').each(function () {
+				var $key = $(this);
+				var id = $key.attr('id');
+				if (id === 'nextcloudUserPassword') {
+					settings[id] = decrypt(secret, settings[id]);
+				}
+				if ($key.attr('type') === 'checkbox') {
+					// do not call onChange direct, because onChange could expect some arguments
+					$key.prop('checked', settings[id]).change(function () {
+						onChange();
+					});
+				} else {
+					// do not call onChange direct, because onChange could expect some arguments
+					$key.val(settings[id]).change(function () {
+						onChange();
+					}).keyup(function () {
+						onChange();
+					});
+				}
+			});
+			onChange(false);
+			// function Materialize.updateTextFields(); to reinitialize all the Materialize labels on the page if you are dynamically adding inputs.
+			M.updateTextFields();
+		}
+
+		// This will be called by the admin adapter when the settings page loads
+		function load(settings, onChange) {
+			// example: select elements with id=key and class=value and insert value
+			if (!settings) return;
+			socket.emit('getObject', 'system.config', function (err, obj) {
+				secret = (obj.native ? obj.native.secret : '') || 'Zgfr56gFe87jJOM';
+				loadHelper(settings, onChange);
+			});
+			onChange(false);
+			// reinitialize all the Materialize labels on the page if you are dynamically adding inputs:
+			//			if (M) M.updateTextFields();
+		}
+
+		// This will be called by the admin adapter when the user presses the save button
+		function save(callback) {
+			// example: select elements with class=value and build settings object
+			var obj = {};
+			$('.value').each(function () {
+				var $this = $(this);
+				var id = $this.attr('id');
+				if ($this.attr('type') === 'checkbox') {
+					obj[id] = $this.prop('checked');
+				} else {
+					var value = $this.val();
+					if (id === 'nextcloudUserPassword') {
+						value = encrypt(secret, value);
+					}
+					obj[id] = value;
+				}
+			});
+
+			callback(obj);
+		}
+	</script>
+
+</head>
+
+<body>
+
+	<div class="m adapter-container">
+
+		<div class="row">
+			<div class="col s12 m4 l2">
+				<img src="nextcloud.png" class="logo">
+			</div>
+		</div>
+		<div class="row">
+			<div class="col s6 input-field">
+				<input type="text" class="value" id="nextcloudUrl" />
+				<label for="nextcloudUrl" class="translate">nextcloudUrl</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col s6 input-field">
+				<input type="text" class="value" id="nextcloudUserName" />
+				<label for="nextcloudUserName" class="translate">nextcloudUserName</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col s6 input-field">
+				<input type="password" class="value" id="nextcloudUserPassword" />
+				<label for="nextcloudUserPassword" class="translate">nextcloudUserPassword</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col s3 input-field">
+				<input type="number" class="value" id="nextcloudPollingInterval" />
+				<label for="nextcloudPollingInterval" class="translate">nextcloudPollingInterval</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col s2 input-field">
+				<input type="checkbox" class="value" id="nextcloudIgnoreCertificateErrors" />
+				<label for="nextcloudIgnoreCertificateErrors" class="translate">nextcloudIgnoreCertificateErrors</label>
+			</div>
+		</div>
+		<div class="row">
+			<div><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VWAXSTS634G88&source=url"
+					target="_blank" class="translate">donation</a></div>
+		</div>
+	</div>
+</body>
+
+</html>

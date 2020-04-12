@@ -1,0 +1,95 @@
+{
+	"common": {
+		"name": "nextcloud",
+		"version": "0.0.1",
+		"news": {
+			"0.0.1": {
+				"en": "initial release",
+				"de": "Erstveröffentlichung",
+				"ru": "Начальная версия",
+				"pt": "lançamento inicial",
+				"nl": "Eerste uitgave",
+				"fr": "Première version",
+				"it": "Versione iniziale",
+				"es": "Versión inicial",
+				"pl": "Pierwsze wydanie",
+				"zh-cn": "首次出版"
+			}
+		},
+		"title": "Nextcloud",
+		"titleLang": {
+			"en": "Nextcloud",
+			"de": "Nächste Wolke",
+			"ru": "Nextcloud",
+			"pt": "Nextcloud",
+			"nl": "Nextcloud",
+			"fr": "Nextcloud",
+			"it": "Nextcloud",
+			"es": "Nextcloud",
+			"pl": "Nextcloud",
+			"zh-cn": "Nextcloud"
+		},
+		"desc": {
+			"en": "tbd",
+			"de": "tbd",
+			"ru": "TBD",
+			"pt": "tbd",
+			"nl": "tbd",
+			"fr": "tbd",
+			"it": "tbd",
+			"es": "tbd",
+			"pl": "tbd",
+			"zh-cn": "待定"
+		},
+		"authors": [
+			"Scrounger <scrounger@gmx.net>"
+		],
+		"keywords": [
+			"Nextcloud",
+			"SmartHome",
+			"communication"
+		],
+		"license": "MIT",
+		"platform": "Javascript/Node.js",
+		"main": "main.js",
+		"icon": "nextcloud.png",
+		"enabled": true,
+		"extIcon": "https://raw.githubusercontent.com/Scrounger/ioBroker.nextcloud/master/admin/nextcloud.png",
+		"readme": "https://github.com/Scrounger/ioBroker.nextcloud/blob/master/README.md",
+		"loglevel": "info",
+		"mode": "daemon",
+		"type": "misc-data",
+		"compact": true,
+		"connectionType": "cloud",
+		"dataSource": "poll",
+		"materialize": true,
+		"dependencies": [
+			{
+				"js-controller": ">=1.4.2"
+			}
+		]
+	},
+	"native": {
+		"nextcloudUserName": "",
+		"nextcloudUserPassword": "",
+		"nextcloudUrl": "https://myNextcloud.com",
+		"nextcloudPollingInterval": 60,
+		"nextcloudIgnoreCertificateErrors": false
+	},
+	"objects": [],
+	"instanceObjects": [
+		{
+			"_id": "info.connection",
+			"type": "state",
+			"common": {
+				"role": "indicator.connected",
+				"name": "If connected to NextCloud",
+				"type": "boolean",
+				"read": true,
+				"write": false,
+				"def": false
+			},
+			"native": {}
+		}
+	]
+}
