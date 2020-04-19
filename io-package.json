@@ -60,7 +60,7 @@
 		"mode": "daemon",
 		"type": "misc-data",
 		"compact": true,
-		"connectionType": "cloud",
+		"connectionType": "local",
 		"dataSource": "poll",
 		"materialize": true,
 		"dependencies": [

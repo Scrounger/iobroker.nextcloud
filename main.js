@@ -41,13 +41,12 @@ class Nextcloud extends utils.Adapter {
 		try {
 			// Check if credentials are not empty and decrypt stored password
 			if (await this.getSettings()) {
-				await this.checkConnection();
-				// this.log.info(JSON.stringify(sys.nextcloud.system));
-				// this.log.info(JSON.stringify(sys.nextcloud.storage));
-				// this.log.info(JSON.stringify(sys.nextcloud.shares));
 
-				// this.log.info(JSON.stringify(sys.server));
-				// this.log.info(JSON.stringify(sys.activeUsers));
+				await this.getData();
+
+				// setInterval(async () => {
+				// 	await this.getData();
+				// }, this.config.nextcloudPollingInterval * 1000);
 
 			} else {
 				this.log.error("*** Adapter deactivated, credentials missing in Adaptper Settings !!!  ***");
@@ -164,6 +163,62 @@ class Nextcloud extends utils.Adapter {
 		}
 	}
 
+	async getData() {
+		let connection = await this.checkConnection();
+
+		if (connection && connection.isConnected && connection.client) {
+			this.log.info('Connection to Nextcloud successful. Loading data...');
+
+
+			// this.log.warn('System Infos');
+			// this.log.info(JSON.stringify(connection.systemInfos.nextcloud));
+
+			// let systemBasicData = await connection.client.getSystemBasicData();
+			// this.log.info(JSON.stringify(systemBasicData));
+
+			// this.log.warn('Notification')
+			// let notifications = await connection.client.getNotifications();
+			// this.log.info(JSON.stringify(notifications));
+
+			// let updateNotifications = await connection.client.getUpdateNotifications(connection.systemInfos.nextcloud.system['version']);
+			// this.log.info(JSON.stringify(updateNotifications));
+
+			// await connection.client.sendNotificationToUser({ userId: 'Scrounger', shortMessage: 'Nachricht', longMessage: "Now was langes hinter her!" });
+
+
+			// this.log.warn('Apps Infos');
+			// let apps = await connection.client.getApps();
+			// this.log.info(JSON.stringify(apps));
+
+			// let appInfo = await connection.client.getAppInfos("updatenotification");
+			// this.log.info(JSON.stringify(appInfo));
+
+			// this.log.warn('User Infos');
+			// let userDetails = await connection.client.getUserDetails();
+			// this.log.info(JSON.stringify(userDetails));
+
+			// this.log.warn('Group Infos');
+			// let groups = await connection.client.getGroups();
+			// this.log.info(JSON.stringify(groups));
+
+			// let groupDetails = await connection.client.getGroupsDetails();
+			// this.log.info(JSON.stringify(groupDetails));
+
+			// let groupDetailsById = await connection.client.getGroupsDetailsByID('admin');
+			// this.log.info(JSON.stringify(groupDetailsById));
+
+			// let userDetailsByID = await connection.client.getUserDetailsByID('Scrounger');
+			// this.log.info(JSON.stringify(userDetailsByID));
+
+			let test = await connection.client.getUserIDs();
+
+			this.log.info(JSON.stringify(test));
+
+
+
+		}
+	}
+
 	async getSettings() {
 		if (this.config.nextcloudUrl !== "") {
 			process.env.NEXTCLOUD_URL = `${this.config.nextcloudUrl}/remote.php/webdav`;
@@ -204,6 +259,7 @@ class Nextcloud extends utils.Adapter {
 
 		return false;
 	}
+
 
 	async checkConnection() {
 		try {
