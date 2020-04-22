@@ -11,13 +11,18 @@ const utils = require('@iobroker/adapter-core');
 
 // Load your modules here, e.g.:
 const api = require('nextcloud-node-client');
+const words = require('./admin/words.js');
 
 let availableData = null;
+let language = 'en';
+let _ = null;
 
 let blacklist = {
 	system: ['theme', 'enable_avatars', 'enable_previews', 'memcache.local', 'memcache.distributed', 'filelocking.enabled', 'memcache.locking', 'debug', 'apps'],
 	apps: ['app_updates']
 }
+
+let stringValues = ['version']
 
 class Nextcloud extends utils.Adapter {
 
@@ -41,19 +46,15 @@ class Nextcloud extends utils.Adapter {
 	 */
 	async onReady() {
 		try {
+			await this.prepareTranslation();
+
 			// Check if credentials are not empty and decrypt stored password
 			if (await this.getSettings()) {
-
 				let connection = await this.checkConnection();
 
 				await this.getAvailableData(connection);
 
-				// await this.getData();
-
-				// setInterval(async () => {
-				// 	await this.getData();
-				// }, this.config.nextcloudPollingInterval * 1000);
-
+				this.getData();
 			} else {
 				this.log.error("*** Adapter deactivated, credentials missing in Adaptper Settings !!!  ***");
 				this.setForeignState("system.adapter." + this.namespace + ".alive", false);
@@ -154,6 +155,58 @@ class Nextcloud extends utils.Adapter {
 		}
 	}
 
+	async getData() {
+		try {
+			let connection = await this.checkConnection();
+
+			if (connection.isConnected) {
+
+				if (connection.systemInfos) {
+					this.createStateForObject(connection.systemInfos.server, 'server');
+					this.createStateForObject(connection.systemInfos.nextcloud.system, 'system');
+					this.createStateForObject(connection.systemInfos.nextcloud.storage, 'storage');
+					this.createStateForObject(connection.systemInfos.nextcloud.shares, 'shares');
+				}
+
+			}
+		} catch (err) {
+			this.log.error(`[getData] error: ${err.message}, stack: ${err.stack}`);
+		}
+
+	}
+
+	/**
+	 * @param {object} obj
+	 * @param {string} idPrefix
+	 */
+	async createStateForObject(obj, idPrefix) {
+		if (obj) {
+			for (const [key, value] of Object.entries(obj)) {
+				this.log.info(JSON.stringify(this.config[idPrefix]));
+				if (this.config[idPrefix].includes(key) && this.config[`enable${idPrefix}`]) {
+
+					if (typeof value === 'object') {
+						for (const [subkey, subValue] of Object.entries(value)) {
+							await this.createStatisticObjectNumber(`${idPrefix}.${key.toLowerCase()}.${subkey.toLowerCase()}`, _(key), '');
+							await this.setStateAsync(`${idPrefix}.${key.toLowerCase()}.${subkey.toLowerCase()}`, subValue, true);
+						}
+					} else {
+						if (isNaN(parseFloat(value)) || stringValues.includes(key)) {
+							await this.createStatisticObjectString(`${idPrefix}.${key.toLowerCase()}`, _(key));
+							await this.setStateAsync(`${idPrefix}.${key.toLowerCase()}`, value, true);
+						} else {
+							await this.createStatisticObjectNumber(`${idPrefix}.${key.toLowerCase()}`, _(key), '');
+							await this.setStateAsync(`${idPrefix}.${key.toLowerCase()}`, value, true);
+						}
+					}
+				} else {
+					if (await this.getObjectAsync(`${this.namespace}.${idPrefix}.${key.toLowerCase()}`)) {
+						await this.delObjectAsync(`${this.namespace}.${idPrefix}.${key.toLowerCase()}`);
+					}
+				}
+			}
+		}
+	}
 
 	/**
 	 * @param {object} obj
@@ -173,7 +226,7 @@ class Nextcloud extends utils.Adapter {
 		}
 	}
 
-	async getData() {
+	async apiTest() {
 		let connection = await this.checkConnection();
 
 		if (connection && connection.isConnected && connection.client) {
@@ -292,6 +345,90 @@ class Nextcloud extends utils.Adapter {
 		}
 	}
 
+
+	/**
+ * @param {string} id
+ * @param {string} name
+ * @param {any} unit
+ */
+	async createStatisticObjectNumber(id, name, unit) {
+		let obj = await this.getObjectAsync(id);
+
+		if (obj) {
+			if (obj.common.name !== name || obj.common['unit'] !== unit) {
+				this.log.info(JSON.stringify(obj));
+
+				obj.common.name = name;
+				obj.common['unit'] = unit;
+
+				await this.setObject(id, obj);
+			}
+		} else {
+			await this.setObjectNotExistsAsync(id,
+				{
+					type: 'state',
+					common: {
+						name: name,
+						desc: 'sql statistic',
+						type: 'number',
+						unit: unit,
+						read: true,
+						write: false,
+						role: 'value'
+					},
+					native: {}
+				});
+		}
+	}
+
+	/**
+	 * @param {string} id
+	 * @param {string} name
+	 */
+	async createStatisticObjectString(id, name) {
+		let obj = await this.getObjectAsync(id);
+
+		if (obj) {
+			if (obj.common.name !== name) {
+				obj.common.name = name;
+				await this.setObject(id, obj);
+			}
+		} else {
+			await this.setObjectNotExistsAsync(id,
+				{
+					type: 'state',
+					common: {
+						name: name,
+						desc: 'sql statistic',
+						type: 'string',
+						read: true,
+						write: false,
+						role: 'value'
+					},
+					native: {}
+				});
+		}
+	}
+
+	async prepareTranslation() {
+		// language for Tranlation
+		var sysConfig = await this.getForeignObjectAsync('system.config');
+		if (sysConfig && sysConfig.common && sysConfig.common['language']) {
+			language = sysConfig.common['language']
+		}
+
+		// language Function
+		/**
+		 * @param {string | number} string
+		 */
+		_ = function (string) {
+			if (words[string]) {
+				return words[string][language]
+			} else {
+				return string;
+			}
+		}
+	}
 	// /**
 	//  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
 	//  * Using this method requires "common.message" property to be set to true in io-package.json

@@ -19,7 +19,6 @@ function load(settings, onChange) {
             id: `${myNamespace}.info`,
             property: 'system',
             defaults: ["version", "freespace", "cpuload", "mem_total", "mem_free"],
-            ignores: ["version"],
             parentContainerId: 'container_system'
         },
         {
@@ -49,7 +48,7 @@ function load(settings, onChange) {
         generateCheckboxList(options, settings, onChange)
     }
 
-    showHideSettings();
+    eventsHandler();
 
     onChange(false);
 
@@ -57,7 +56,7 @@ function load(settings, onChange) {
     if (M) M.updateTextFields();
 }
 
-function showHideSettings() {
+function eventsHandler() {
     $("[id*=enable]").each(function () {
         let key = $(this).attr('id').replace('enable', '').toLowerCase();
 

@@ -1,7 +1,7 @@
 /*global systemDictionary:true */
 'use strict';
 
-systemDictionary = {
+const dictionary = {
 	'nextcloud adapter settings': {
 		'en': 'Adapter settings for nextcloud',
 		'de': 'Adaptereinstellungen für nextcloud',
@@ -259,3 +259,10 @@ systemDictionary = {
 	}
 
 };
+
+// @ts-ignore
+try {
+	systemDictionary = dictionary;
+} catch (ignore) { }
+
+module.exports = dictionary;

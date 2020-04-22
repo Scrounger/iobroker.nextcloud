@@ -75,13 +75,13 @@
 		"nextcloudUrl": "https://myNextcloud.com",
 		"nextcloudPollingInterval": 60,
 		"nextcloudIgnoreCertificateErrors": false,
-		"enableServer": true,
+		"enableserver": true,
 		"server": [
 			"webserver",
 			"php",
 			"database"
 		],
-		"enableSystem": true,
+		"enablesystem": true,
 		"system": [
 			"version",
 			"freespace",
@@ -89,14 +89,14 @@
 			"mem_total",
 			"mem_free"
 		],
-		"enableStorage": true,
+		"enablestorage": true,
 		"storage": [
 			"num_users",
 			"num_files",
 			"num_storages",
 			"num_storages_local"
 		],
-		"enableShares": true,
+		"enableshares": true,
 		"shares": [
 			"num_shares",
 			"num_shares_user",
