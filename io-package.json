@@ -74,10 +74,46 @@
 		"nextcloudUserPassword": "",
 		"nextcloudUrl": "https://myNextcloud.com",
 		"nextcloudPollingInterval": 60,
-		"nextcloudIgnoreCertificateErrors": false
+		"nextcloudIgnoreCertificateErrors": false,
+		"enableServer": true,
+		"server": [
+			"webserver",
+			"php",
+			"database"
+		],
+		"enableSystem": true,
+		"system": [
+			"version",
+			"freespace",
+			"cpuload",
+			"mem_total",
+			"mem_free"
+		],
+		"enableStorage": true,
+		"storage": [
+			"num_users",
+			"num_files",
+			"num_storages",
+			"num_storages_local"
+		],
+		"enableShares": true,
+		"shares": [
+			"num_shares",
+			"num_shares_user",
+			"num_shares_groups",
+			"num_shares_link"
+		]
 	},
 	"objects": [],
 	"instanceObjects": [
+		{
+			"_id": "info",
+			"type": "channel",
+			"common": {
+				"name": "Information"
+			},
+			"native": {}
+		},
 		{
 			"_id": "info.connection",
 			"type": "state",

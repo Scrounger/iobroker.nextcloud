@@ -12,10 +12,12 @@ const utils = require('@iobroker/adapter-core');
 // Load your modules here, e.g.:
 const api = require('nextcloud-node-client');
 
-let pass = "";
+let availableData = null;
 
-
-
+let blacklist = {
+	system: ['theme', 'enable_avatars', 'enable_previews', 'memcache.local', 'memcache.distributed', 'filelocking.enabled', 'memcache.locking', 'debug', 'apps'],
+	apps: ['app_updates']
+}
 
 class Nextcloud extends utils.Adapter {
 
@@ -42,7 +44,11 @@ class Nextcloud extends utils.Adapter {
 			// Check if credentials are not empty and decrypt stored password
 			if (await this.getSettings()) {
 
-				await this.getData();
+				let connection = await this.checkConnection();
+
+				await this.getAvailableData(connection);
+
+				// await this.getData();
 
 				// setInterval(async () => {
 				// 	await this.getData();
@@ -52,55 +58,6 @@ class Nextcloud extends utils.Adapter {
 				this.log.error("*** Adapter deactivated, credentials missing in Adaptper Settings !!!  ***");
 				this.setForeignState("system.adapter." + this.namespace + ".alive", false);
 			}
-
-			// // Initialize your adapter here
-
-			// // The adapters config (in the instance object everything under the attribute "native") is accessible via
-			// // this.config:
-			// this.log.info('config option1: ' + this.config.option1);
-			// this.log.info('config option2: ' + this.config.option2);
-
-			// /*
-			// For every state in the system there has to be also an object of type state
-			// Here a simple template for a boolean variable named "testVariable"
-			// Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-			// */
-			// await this.setObjectAsync('testVariable', {
-			// 	type: 'state',
-			// 	common: {
-			// 		name: 'testVariable',
-			// 		type: 'boolean',
-			// 		role: 'indicator',
-			// 		read: true,
-			// 		write: true,
-			// 	},
-			// 	native: {},
-			// });
-
-			// // in this template all states changes inside the adapters namespace are subscribed
-			// this.subscribeStates('*');
-
-			// /*
-			// setState examples
-			// you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
-			// */
-			// // the variable testVariable is set to true as command (ack=false)
-			// await this.setStateAsync('testVariable', true);
-
-			// // same thing, but the value is flagged "ack"
-			// // ack should be always set to true if the value is received from or acknowledged from the target system
-			// await this.setStateAsync('testVariable', { val: true, ack: true });
-
-			// // same thing, but the state is deleted after 30s (getState will return null afterwards)
-			// await this.setStateAsync('testVariable', { val: true, ack: true, expire: 30 });
-
-			// // examples for the checkPassword/checkGroup functions
-			// let result = await this.checkPasswordAsync('admin', 'iobroker');
-			// this.log.info('check user admin pw iobroker: ' + result);
-
-			// result = await this.checkGroupAsync('admin', 'admin');
-			// this.log.info('check group user admin group admin: ' + result);
-
 		} catch (ex) {
 			this.log.error(`error: ${ex.message}, stack: ${ex.stack}`);
 		}
@@ -163,6 +120,59 @@ class Nextcloud extends utils.Adapter {
 		}
 	}
 
+	/**
+	 * @param {object} connection
+	 */
+	async getAvailableData(connection) {
+
+		if (connection.isConnected && connection.client) {
+			availableData = {};
+
+			// this.getAvailableDataServerInfos(connection);
+			// this.getAvailableDataSystemInfos(connection);
+			// this.getAvailableDataStorageInfos(connection);
+
+			this.getAvailableDataFromObject(connection.systemInfos.server, 'server');
+			this.getAvailableDataFromObject(connection.systemInfos.nextcloud.system, 'system');
+			this.getAvailableDataFromObject(connection.systemInfos.nextcloud.storage, 'storage');
+			this.getAvailableDataFromObject(connection.systemInfos.nextcloud.shares, 'shares');
+
+			this.getAvailableDataFromObject(connection.systemInfos.nextcloud.system.apps, 'apps');
+
+			this.log.info(JSON.stringify(availableData));
+
+
+			let updateObj = await this.getObjectAsync('info');
+			if (updateObj) {
+				updateObj.native = availableData;
+
+				await this.setObjectAsync('info', updateObj);
+				this.log.info(`Successful updating avaiable datapoint infos!`);
+			} else {
+				this.log.error(`datapoint '${this.namespace}.info' not exist!`);
+			}
+		}
+	}
+
+
+	/**
+	 * @param {object} obj
+	 * @param {string | number} name
+	 */
+	getAvailableDataFromObject(obj, name) {
+		if (obj) {
+			if (!availableData[name]) {
+				availableData[name] = [];
+			}
+
+			for (const key of Object.keys(obj)) {
+				if ((blacklist[name] && !blacklist[name].includes(key)) || !blacklist[name]) {
+					availableData[name].push(key);
+				}
+			}
+		}
+	}
+
 	async getData() {
 		let connection = await this.checkConnection();
 
@@ -176,21 +186,23 @@ class Nextcloud extends utils.Adapter {
 			// let systemBasicData = await connection.client.getSystemBasicData();
 			// this.log.info(JSON.stringify(systemBasicData));
 
-			// this.log.warn('Notification')
+			// // this.log.warn('Notification')
 			// let notifications = await connection.client.getNotifications();
 			// this.log.info(JSON.stringify(notifications));
+
+
 
 			// let updateNotifications = await connection.client.getUpdateNotifications(connection.systemInfos.nextcloud.system['version']);
 			// this.log.info(JSON.stringify(updateNotifications));
 
-			// await connection.client.sendNotificationToUser({ userId: 'Scrounger', shortMessage: 'Nachricht', longMessage: "Now was langes hinter her!" });
+			// await connection.client.sendNotificationToUser('Scrounger', 'Nachricht', "Now was langes hinter her!");
 
 
 			// this.log.warn('Apps Infos');
 			// let apps = await connection.client.getApps();
 			// this.log.info(JSON.stringify(apps));
 
-			// let appInfo = await connection.client.getAppInfos("updatenotification");
+			// let appInfo = await connection.client.getAppInfos("contacts");
 			// this.log.info(JSON.stringify(appInfo));
 
 			// this.log.warn('User Infos');
@@ -220,6 +232,8 @@ class Nextcloud extends utils.Adapter {
 	}
 
 	async getSettings() {
+		let password = "";
+
 		if (this.config.nextcloudUrl !== "") {
 			process.env.NEXTCLOUD_URL = `${this.config.nextcloudUrl}/remote.php/webdav`;
 		} else {
@@ -237,18 +251,18 @@ class Nextcloud extends utils.Adapter {
 
 			if (obj && obj.native && obj.native.secret) {
 				//noinspection JSUnresolvedVariable
-				pass = this.decrypt(obj.native.secret, this.config.nextcloudUserPassword);
+				password = this.decrypt(obj.native.secret, this.config.nextcloudUserPassword);
 			} else {
 				//noinspection JSUnresolvedVariable
-				pass = this.decrypt("Zgfr56gFe87jJOM", this.config.nextcloudUserPassword);
+				password = this.decrypt("Zgfr56gFe87jJOM", this.config.nextcloudUserPassword);
 			}
 
-			process.env.NEXTCLOUD_PASSWORD = pass;
+			process.env.NEXTCLOUD_PASSWORD = password;
 		} else {
 			this.log.warn(`no user password defined in  Adaptper Settings!`);
 		}
 
-		if (this.config.nextcloudUrl !== "" && this.config.nextcloudUserName !== "" && pass !== "") {
+		if (this.config.nextcloudUrl !== "" && this.config.nextcloudUserName !== "" && password !== "") {
 			if (this.config.nextcloudIgnoreCertificateErrors) {
 				// ignore Certificate Error
 				process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = "0";
