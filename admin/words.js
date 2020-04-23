@@ -256,12 +256,295 @@ const dictionary = {
 		"es": "versión",
 		"pl": "wersja",
 		"zh-cn": "版"
-	}
+	},
 
+	// storage datapoints
+	"num_files": {
+		"en": "count of files",
+		"de": "Anzahl der Dateien",
+		"ru": "количество файлов",
+		"pt": "contagem de arquivos",
+		"nl": "aantal bestanden",
+		"fr": "nombre de fichiers",
+		"it": "conteggio dei file",
+		"es": "recuento de archivos",
+		"pl": "liczba plików",
+		"zh-cn": "文件数"
+	},
+	"num_storages": {
+		"en": "count of hard disks",
+		"de": "Anzahl der Festplatten",
+		"ru": "количество жестких дисков",
+		"pt": "contagem de discos rígidos",
+		"nl": "aantal harde schijven",
+		"fr": "nombre de disques durs",
+		"it": "conteggio dei dischi rigidi",
+		"es": "recuento de discos duros",
+		"pl": "liczba dysków twardych",
+		"zh-cn": "硬盘数"
+	},
+	"num_storages_home": {
+		"en": "count of hard disks home",
+		"de": "Anzahl der Festplatten Home",
+		"ru": "количество жестких дисков дома",
+		"pt": "contagem de discos rígidos em casa",
+		"nl": "aantal harde schijven thuis",
+		"fr": "nombre de disques durs à la maison",
+		"it": "conteggio dei dischi rigidi a casa",
+		"es": "conteo de discos duros en casa",
+		"pl": "liczba dysków twardych w domu",
+		"zh-cn": "硬盘数量"
+	},
+	"num_storages_local": {
+		"en": "count of local hard disks",
+		"de": "Anzahl der lokalen Festplatten",
+		"ru": "количество локальных жестких дисков",
+		"pt": "contagem de discos rígidos locais",
+		"nl": "aantal lokale harde schijven",
+		"fr": "nombre de disques durs locaux",
+		"it": "conteggio dei dischi rigidi locali",
+		"es": "recuento de discos duros locales",
+		"pl": "liczba lokalnych dysków twardych",
+		"zh-cn": "本地硬盘数"
+	},
+	"num_storages_other": {
+		"en": "count of other hard disks",
+		"de": "Anzahl anderer Festplatten",
+		"ru": "количество других жестких дисков",
+		"pt": "contagem de outros discos rígidos",
+		"nl": "aantal andere harde schijven",
+		"fr": "nombre d'autres disques durs",
+		"it": "conteggio di altri dischi rigidi",
+		"es": "recuento de otros discos duros",
+		"pl": "liczba innych dysków twardych",
+		"zh-cn": "其他硬盘数"
+	},
+	"num_users": {
+		"en": "count of users",
+		"de": "Anzahl der Benutzer",
+		"ru": "количество пользователей",
+		"pt": "contagem de usuários",
+		"nl": "aantal gebruikers",
+		"fr": "nombre d'utilisateurs",
+		"it": "conteggio degli utenti",
+		"es": "recuento de usuarios",
+		"pl": "liczba użytkowników",
+		"zh-cn": "用户数"
+	},
+
+	// server datapoints
+	"database": {
+		"en": "database",
+		"de": "Datenbank",
+		"ru": "база данных",
+		"pt": "base de dados",
+		"nl": "database",
+		"fr": "base de données",
+		"it": "Banca dati",
+		"es": "base de datos",
+		"pl": "Baza danych",
+		"zh-cn": "数据库"
+	},
+	"php": {
+		"en": "php",
+		"de": "PHP",
+		"ru": "PHP",
+		"pt": "php",
+		"nl": "php",
+		"fr": "php",
+		"it": "php",
+		"es": "php",
+		"pl": "php",
+		"zh-cn": "的PHP"
+	},
+	"webserver": {
+		"en": "webserver",
+		"de": "Webserver",
+		"ru": "веб сервер",
+		"pt": "servidor web",
+		"nl": "web Server",
+		"fr": "serveur Web",
+		"it": "server web",
+		"es": "Servidor web",
+		"pl": "serwer internetowy",
+		"zh-cn": "网络服务器"
+	},
+	"size": {
+		"en": "size",
+		"de": "Größe",
+		"ru": "размер",
+		"pt": "Tamanho",
+		"nl": "grootte",
+		"fr": "Taille",
+		"it": "taglia",
+		"es": "Talla",
+		"pl": "rozmiar",
+		"zh-cn": "尺寸"
+	},
+	"type": {
+		"en": "provider",
+		"de": "Anbieter",
+		"ru": "поставщик",
+		"pt": "fornecedor",
+		"nl": "aanbieder",
+		"fr": "fournisseur",
+		"it": "fornitore",
+		"es": "proveedor",
+		"pl": "dostawca",
+		"zh-cn": "提供者"
+	},
+	"max_execution_time": {
+		"en": "max execution time",
+		"de": "maximale Ausführungszeit",
+		"ru": "максимальное время выполнения",
+		"pt": "tempo máximo de execução",
+		"nl": "maximale uitvoeringstijd",
+		"fr": "temps d'exécution max",
+		"it": "tempo massimo di esecuzione",
+		"es": "tiempo máximo de ejecución",
+		"pl": "maksymalny czas wykonania",
+		"zh-cn": "最大执行时间"
+	},
+	"memory_limit": {
+		"en": "memory limit",
+		"de": "Arbeitspeicher Grenzwert",
+		"ru": "ограничение памяти",
+		"pt": "limite de memória",
+		"nl": "geheugenlimiet",
+		"fr": "limite de mémoire",
+		"it": "limite di memoria",
+		"es": "limite de memoria",
+		"pl": "limit pamięci",
+		"zh-cn": "内存限制"
+	},
+	"upload_max_filesize": {
+		"en": "max filesize of upload",
+		"de": "maximale Größe zum Hochladen",
+		"ru": "максимальный размер файла загрузки",
+		"pt": "tamanho máximo de arquivo do upload",
+		"nl": "maximale bestandsgrootte van upload",
+		"fr": "taille maximale de fichier de téléchargement",
+		"it": "dimensione file massima del caricamento",
+		"es": "tamaño de archivo máximo de carga",
+		"pl": "maksymalny rozmiar pliku do przesłania",
+		"zh-cn": "上载的最大档案大小"
+	},
+
+
+	// shares datapoints
+	"num_fed_shares_received": {
+		"en": "count of Federation shares received",
+		"de": "Anzahl der erhaltenen Federation Freigaben",
+		"ru": "количество полученных федерацией акций",
+		"pt": "contagem de compartilhamentos da Federação recebidos",
+		"nl": "aantal ontvangen Federation-aandelen",
+		"fr": "nombre d'actions fédérales reçues",
+		"it": "conteggio delle azioni della Federazione ricevute",
+		"es": "recuento de acciones de la Federación recibidas",
+		"pl": "liczba otrzymanych akcji Federacji",
+		"zh-cn": "收到的联邦股份数"
+	},
+	"num_fed_shares_sent": {
+		"en": "count of Federation shares sent",
+		"de": "Anzahl der gesendeten Federation Freigaben",
+		"ru": "количество отправленных акций федерации",
+		"pt": "contagem de compartilhamentos da Federação enviados",
+		"nl": "aantal verzonden Federation-aandelen",
+		"fr": "nombre d'actions de la Fédération envoyées",
+		"it": "conteggio delle azioni federali inviate",
+		"es": "conteo de acciones de la Federación enviadas",
+		"pl": "liczba wysłanych akcji Federacji",
+		"zh-cn": "发送的联盟份额数"
+	},
+	"num_shares": {
+		"en": "count of shares",
+		"de": "Anzahl der Freigaben",
+		"ru": "количество акций",
+		"pt": "contagem de ações",
+		"nl": "aantal aandelen",
+		"fr": "nombre d'actions",
+		"it": "conteggio delle azioni",
+		"es": "recuento de acciones",
+		"pl": "liczba akcji",
+		"zh-cn": "股份数"
+	},
+	"num_shares_groups": {
+		"en": "count of group shares",
+		"de": "Anzahl der Gruppenfreigaben",
+		"ru": "количество групповых акций",
+		"pt": "contagem de ações do grupo",
+		"nl": "aantal groepsaandelen",
+		"fr": "nombre de parts de groupe",
+		"it": "conteggio delle condivisioni di gruppo",
+		"es": "recuento de acciones del grupo",
+		"pl": "liczba akcji grupowych",
+		"zh-cn": "集团股份数"
+	},
+	"num_shares_link": {
+		"en": "count of link shares",
+		"de": "Anzahl der Linkfreigaben",
+		"ru": "количество ссылок",
+		"pt": "contagem de compartilhamentos de links",
+		"nl": "aantal linkshares",
+		"fr": "nombre de partages de liens",
+		"it": "conteggio delle condivisioni dei collegamenti",
+		"es": "recuento de enlaces compartidos",
+		"pl": "liczba udostępnień linków",
+		"zh-cn": "链接共享数"
+	},
+	"num_shares_link_no_password": {
+		"en": "count of link shares without password",
+		"de": "Anzahl der Linkfreigaben ohne Passwort",
+		"ru": "количество ссылок без пароля",
+		"pt": "contagem de compartilhamentos de links sem senha",
+		"nl": "aantal linkshares zonder wachtwoord",
+		"fr": "nombre de partages de liens sans mot de passe",
+		"it": "conteggio delle condivisioni di link senza password",
+		"es": "recuento de enlaces compartidos sin contraseña",
+		"pl": "liczba udostępnień linków bez hasła",
+		"zh-cn": "没有密码的链接共享数"
+	},
+	"num_shares_mail": {
+		"en": "count of mail shares",
+		"de": "Anzahl der E-Mail Freigaben",
+		"ru": "количество почтовых акций",
+		"pt": "contagem de compartilhamentos de correio",
+		"nl": "aantal mail shares",
+		"fr": "nombre de partages de courrier",
+		"it": "conteggio delle condivisioni di posta",
+		"es": "recuento de recursos compartidos por correo",
+		"pl": "liczba akcji pocztowych",
+		"zh-cn": "邮件共享数"
+	},
+	"num_shares_room": {
+		"en": "count of room shares",
+		"de": "Anzahl der Raum Freigaben",
+		"ru": "количество комнатных акций",
+		"pt": "contagem de compartilhamentos de quartos",
+		"nl": "telling van kameraandelen",
+		"fr": "nombre de parts de chambre",
+		"it": "conteggio delle condivisioni di stanze",
+		"es": "recuento de habitaciones compartidas",
+		"pl": "liczba udziałów w pokoju",
+		"zh-cn": "房间数"
+	},
+	"num_shares_user": {
+		"en": "count of user shares",
+		"de": "Anzahl der Benutzerfreigaben",
+		"ru": "количество пользовательских акций",
+		"pt": "contagem de compartilhamentos de usuários",
+		"nl": "aantal gebruikersshares",
+		"fr": "nombre de partages d'utilisateurs",
+		"it": "conteggio delle condivisioni utente",
+		"es": "recuento de acciones de usuario",
+		"pl": "liczba udziałów użytkowników",
+		"zh-cn": "用户份额数"
+	}
 };
 
-// @ts-ignore
+
 try {
+	// @ts-ignore
 	systemDictionary = dictionary;
 } catch (ignore) { }
 

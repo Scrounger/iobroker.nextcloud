@@ -23,6 +23,12 @@ let blacklist = {
 }
 
 let stringValues = ['version']
+let bytesToGB = ['freespace'];
+let kBytesToGB = ['mem_free', 'mem_total', 'swap_free', 'swap_total'];
+
+
+// https://10.0.124.223/apps/contacts/img/app.svg
+//https://10.0.124.223/svg/contacts/app?color=000000
 
 class Nextcloud extends utils.Adapter {
 
@@ -140,8 +146,6 @@ class Nextcloud extends utils.Adapter {
 
 			this.getAvailableDataFromObject(connection.systemInfos.nextcloud.system.apps, 'apps');
 
-			this.log.info(JSON.stringify(availableData));
-
 
 			let updateObj = await this.getObjectAsync('info');
 			if (updateObj) {
@@ -162,11 +166,13 @@ class Nextcloud extends utils.Adapter {
 			if (connection.isConnected) {
 
 				if (connection.systemInfos) {
-					this.createStateForObject(connection.systemInfos.server, 'server');
+					this.createStateForObject(connection.systemInfos.server, 'server', 'system');
 					this.createStateForObject(connection.systemInfos.nextcloud.system, 'system');
-					this.createStateForObject(connection.systemInfos.nextcloud.storage, 'storage');
-					this.createStateForObject(connection.systemInfos.nextcloud.shares, 'shares');
+					this.createStateForObject(connection.systemInfos.nextcloud.storage, 'storage', 'system');
+					this.createStateForObject(connection.systemInfos.nextcloud.shares, 'shares', 'system');
 				}
+
+				this.apiTest();
 
 			}
 		} catch (err) {
@@ -177,31 +183,54 @@ class Nextcloud extends utils.Adapter {
 
 	/**
 	 * @param {object} obj
+	 * @param {string} propName
 	 * @param {string} idPrefix
 	 */
-	async createStateForObject(obj, idPrefix) {
+	async createStateForObject(obj, propName, idPrefix = '') {
+		if (idPrefix !== '') {
+			idPrefix = idPrefix + '.';
+		}
+
+		this.log.info(`propName: '${propName}' - idPrefix: '${idPrefix}'`)
+
 		if (obj) {
 			for (const [key, value] of Object.entries(obj)) {
-				this.log.info(JSON.stringify(this.config[idPrefix]));
-				if (this.config[idPrefix].includes(key) && this.config[`enable${idPrefix}`]) {
+				if (this.config[propName].includes(key) && this.config[`enable${propName}`]) {
+					// Ausnahmen
+					if (key === 'cpuload') {
+						await this.createStatisticObjectNumber(`${idPrefix}${propName}.${key.toLowerCase()}`, _(key), '%');
+						await this.setStateAsync(`${idPrefix}${propName}.${key.toLowerCase()}`, value[0], true);
 
-					if (typeof value === 'object') {
+					} else if (stringValues.includes(key)) {
+						await this.createStatisticObjectString(`${idPrefix}${propName}.${key.toLowerCase()}`, _(key));
+						await this.setStateAsync(`${idPrefix}${propName}.${key.toLowerCase()}`, value, true);
+
+					} else if (bytesToGB.includes(key)) {
+						await this.createStatisticObjectNumber(`${idPrefix}${propName}.${key.toLowerCase()}`, _(key), 'GB');
+						await this.setStateAsync(`${idPrefix}${propName}.${key.toLowerCase()}`, Math.round(value / 1024 / 1024 / 1024 * 100) / 100, true);
+
+					} else if (kBytesToGB.includes(key)) {
+						await this.createStatisticObjectNumber(`${idPrefix}${propName}.${key.toLowerCase()}`, _(key), 'GB');
+						await this.setStateAsync(`${idPrefix}${propName}.${key.toLowerCase()}`, Math.round(value / 1024 / 1024 * 100) / 100, true);
+
+					} else if (typeof value === 'object') {
 						for (const [subkey, subValue] of Object.entries(value)) {
-							await this.createStatisticObjectNumber(`${idPrefix}.${key.toLowerCase()}.${subkey.toLowerCase()}`, _(key), '');
-							await this.setStateAsync(`${idPrefix}.${key.toLowerCase()}.${subkey.toLowerCase()}`, subValue, true);
+							await this.createStatisticObjectNumber(`${idPrefix}${propName}.${key.toLowerCase()}.${subkey.toLowerCase()}`, _(subkey), '');
+							await this.setStateAsync(`${idPrefix}${propName}.${key.toLowerCase()}.${subkey.toLowerCase()}`, subValue, true);
 						}
 					} else {
-						if (isNaN(parseFloat(value)) || stringValues.includes(key)) {
-							await this.createStatisticObjectString(`${idPrefix}.${key.toLowerCase()}`, _(key));
-							await this.setStateAsync(`${idPrefix}.${key.toLowerCase()}`, value, true);
+						if (isNaN(value)) {
+							await this.createStatisticObjectString(`${idPrefix}${propName}.${key.toLowerCase()}`, _(key));
+							await this.setStateAsync(`${idPrefix}${propName}.${key.toLowerCase()}`, value, true);
+
 						} else {
-							await this.createStatisticObjectNumber(`${idPrefix}.${key.toLowerCase()}`, _(key), '');
-							await this.setStateAsync(`${idPrefix}.${key.toLowerCase()}`, value, true);
+							await this.createStatisticObjectNumber(`${idPrefix}${propName}.${key.toLowerCase()}`, _(key), '');
+							await this.setStateAsync(`${idPrefix}${propName}.${key.toLowerCase()}`, value, true);
 						}
 					}
 				} else {
-					if (await this.getObjectAsync(`${this.namespace}.${idPrefix}.${key.toLowerCase()}`)) {
-						await this.delObjectAsync(`${this.namespace}.${idPrefix}.${key.toLowerCase()}`);
+					if (await this.getObjectAsync(`${this.namespace}.${idPrefix}${propName}.${key.toLowerCase()}`)) {
+						await this.delObjectAsync(`${this.namespace}.${idPrefix}${propName}.${key.toLowerCase()}`);
 					}
 				}
 			}
@@ -239,7 +268,7 @@ class Nextcloud extends utils.Adapter {
 			// let systemBasicData = await connection.client.getSystemBasicData();
 			// this.log.info(JSON.stringify(systemBasicData));
 
-			// // this.log.warn('Notification')
+			// this.log.warn('Notification');
 			// let notifications = await connection.client.getNotifications();
 			// this.log.info(JSON.stringify(notifications));
 
@@ -278,9 +307,6 @@ class Nextcloud extends utils.Adapter {
 			let test = await connection.client.getUserIDs();
 
 			this.log.info(JSON.stringify(test));
-
-
-
 		}
 	}
 
