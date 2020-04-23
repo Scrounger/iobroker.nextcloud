@@ -539,6 +539,45 @@ const dictionary = {
 		"es": "recuento de acciones de usuario",
 		"pl": "liczba udziałów użytkowników",
 		"zh-cn": "用户份额数"
+	},
+
+
+	// apps datapoints
+	"num_installed": {
+		"en": "count installed",
+		"de": "Anzahl installiert",
+		"ru": "количество установлено",
+		"pt": "contagem instalada",
+		"nl": "aantal geïnstalleerd",
+		"fr": "nombre installé",
+		"it": "conteggio installato",
+		"es": "cuenta instalada",
+		"pl": "liczba zainstalowanych",
+		"zh-cn": "计数安装"
+	},
+	"num_updates_available": {
+		"en": "count updates available",
+		"de": "Anzahl verfügbarer Updates",
+		"ru": "количество доступных обновлений",
+		"pt": "contar atualizações disponíveis",
+		"nl": "tel updates beschikbaar",
+		"fr": "compter les mises à jour disponibles",
+		"it": "contare gli aggiornamenti disponibili",
+		"es": "contar actualizaciones disponibles",
+		"pl": "policzyć dostępne aktualizacje",
+		"zh-cn": "计算可用更新"
+	},
+	"app_updates": {
+		"en": "Apps list with updates",
+		"de": "Apps-Liste mit Updates",
+		"ru": "Список приложений с обновлениями",
+		"pt": "Lista de aplicativos com atualizações",
+		"nl": "Apps-lijst met updates",
+		"fr": "Liste des applications avec mises à jour",
+		"it": "Elenco delle app con aggiornamenti",
+		"es": "Lista de aplicaciones con actualizaciones",
+		"pl": "Lista aplikacji z aktualizacjami",
+		"zh-cn": "具有更新的应用列表"
 	}
 };
 

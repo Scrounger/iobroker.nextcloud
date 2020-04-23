@@ -102,6 +102,12 @@
 			"num_shares_user",
 			"num_shares_groups",
 			"num_shares_link"
+		],
+		"enableapps": true,
+		"apps": [
+			"num_installed",
+			"num_updates_available",
+			"app_updates"
 		]
 	},
 	"objects": [],

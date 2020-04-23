@@ -19,11 +19,17 @@ let _ = null;
 
 let blacklist = {
 	system: ['theme', 'enable_avatars', 'enable_previews', 'memcache.local', 'memcache.distributed', 'filelocking.enabled', 'memcache.locking', 'debug', 'apps'],
+}
+
+// blacklist for objects where sub properties should not be iterate and available as single datapoint selection
+let objectblacklist = {
+	system: ['cpuload'],
 	apps: ['app_updates']
 }
 
 let stringValues = ['version']
-let bytesToGB = ['freespace'];
+let bytesToGB = ['freespace', 'php.upload_max_filesize', 'php.memory_limit'];
+let bytesToMB = ['database.size'];
 let kBytesToGB = ['mem_free', 'mem_total', 'swap_free', 'swap_total'];
 
 
@@ -140,6 +146,7 @@ class Nextcloud extends utils.Adapter {
 			// this.getAvailableDataStorageInfos(connection);
 
 			this.getAvailableDataFromObject(connection.systemInfos.server, 'server');
+
 			this.getAvailableDataFromObject(connection.systemInfos.nextcloud.system, 'system');
 			this.getAvailableDataFromObject(connection.systemInfos.nextcloud.storage, 'storage');
 			this.getAvailableDataFromObject(connection.systemInfos.nextcloud.shares, 'shares');
@@ -164,16 +171,19 @@ class Nextcloud extends utils.Adapter {
 			let connection = await this.checkConnection();
 
 			if (connection.isConnected) {
+				this.log.info('Connection to Nextcloud successful. Loading data...');
 
 				if (connection.systemInfos) {
-					this.createStateForObject(connection.systemInfos.server, 'server', 'system');
-					this.createStateForObject(connection.systemInfos.nextcloud.system, 'system');
-					this.createStateForObject(connection.systemInfos.nextcloud.storage, 'storage', 'system');
-					this.createStateForObject(connection.systemInfos.nextcloud.shares, 'shares', 'system');
+					await this.createStateForObject(connection.systemInfos.server, 'server');
+					await this.createStateForObject(connection.systemInfos.nextcloud.system, 'system');
+					await this.createStateForObject(connection.systemInfos.nextcloud.storage, 'storage');
+					await this.createStateForObject(connection.systemInfos.nextcloud.shares, 'shares');
+					await this.createStateForObject(connection.systemInfos.nextcloud.system.apps, 'apps');
 				}
 
 				this.apiTest();
 
+				this.log.info('Loading data successful.');
 			}
 		} catch (err) {
 			this.log.error(`[getData] error: ${err.message}, stack: ${err.stack}`);
@@ -191,41 +201,29 @@ class Nextcloud extends utils.Adapter {
 			idPrefix = idPrefix + '.';
 		}
 
-		this.log.info(`propName: '${propName}' - idPrefix: '${idPrefix}'`)
-
 		if (obj) {
 			for (const [key, value] of Object.entries(obj)) {
 				if (this.config[propName].includes(key) && this.config[`enable${propName}`]) {
 					// Ausnahmen
-					if (key === 'cpuload') {
-						await this.createStatisticObjectNumber(`${idPrefix}${propName}.${key.toLowerCase()}`, _(key), '%');
-						await this.setStateAsync(`${idPrefix}${propName}.${key.toLowerCase()}`, value[0], true);
+					// this.log.info(key);
+					await this.createStateCorrectType(key, `${idPrefix}${propName}.${key.toLowerCase()}`, key, value);
 
-					} else if (stringValues.includes(key)) {
-						await this.createStatisticObjectString(`${idPrefix}${propName}.${key.toLowerCase()}`, _(key));
-						await this.setStateAsync(`${idPrefix}${propName}.${key.toLowerCase()}`, value, true);
+				} else if (typeof value === 'object' && this.config[`enable${propName}`]
+					&& ((blacklist[propName] && !blacklist[propName].includes(key)) || !blacklist[propName])
+					&& ((objectblacklist[propName] && !objectblacklist[propName].includes(key)) || !objectblacklist[propName])) {
 
-					} else if (bytesToGB.includes(key)) {
-						await this.createStatisticObjectNumber(`${idPrefix}${propName}.${key.toLowerCase()}`, _(key), 'GB');
-						await this.setStateAsync(`${idPrefix}${propName}.${key.toLowerCase()}`, Math.round(value / 1024 / 1024 / 1024 * 100) / 100, true);
+					this.log.info(`isObject -> propName: ${propName}, key: ${key}`);
 
-					} else if (kBytesToGB.includes(key)) {
-						await this.createStatisticObjectNumber(`${idPrefix}${propName}.${key.toLowerCase()}`, _(key), 'GB');
-						await this.setStateAsync(`${idPrefix}${propName}.${key.toLowerCase()}`, Math.round(value / 1024 / 1024 * 100) / 100, true);
+					for (const [subkey, subValue] of Object.entries(value)) {
 
-					} else if (typeof value === 'object') {
-						for (const [subkey, subValue] of Object.entries(value)) {
-							await this.createStatisticObjectNumber(`${idPrefix}${propName}.${key.toLowerCase()}.${subkey.toLowerCase()}`, _(subkey), '');
-							await this.setStateAsync(`${idPrefix}${propName}.${key.toLowerCase()}.${subkey.toLowerCase()}`, subValue, true);
-						}
-					} else {
-						if (isNaN(value)) {
-							await this.createStatisticObjectString(`${idPrefix}${propName}.${key.toLowerCase()}`, _(key));
-							await this.setStateAsync(`${idPrefix}${propName}.${key.toLowerCase()}`, value, true);
+						if (this.config[propName].includes(`${key}.${subkey}`) && this.config[`enable${propName}`]) {
+
+							await this.createStateCorrectType(`${key}.${subkey}`, `${idPrefix}${propName}.${key.toLowerCase()}.${subkey.toLowerCase()}`, subkey, subValue);
 
 						} else {
-							await this.createStatisticObjectNumber(`${idPrefix}${propName}.${key.toLowerCase()}`, _(key), '');
-							await this.setStateAsync(`${idPrefix}${propName}.${key.toLowerCase()}`, value, true);
+							if (await this.getObjectAsync(`${this.namespace}.${idPrefix}${propName}.${key.toLowerCase()}.${subkey.toLowerCase()}`)) {
+								await this.delObjectAsync(`${this.namespace}.${idPrefix}${propName}.${key.toLowerCase()}.${subkey.toLowerCase()}`);
+							}
 						}
 					}
 				} else {
@@ -233,6 +231,50 @@ class Nextcloud extends utils.Adapter {
 						await this.delObjectAsync(`${this.namespace}.${idPrefix}${propName}.${key.toLowerCase()}`);
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * @param {string} key
+	 * @param {string} id
+	 * @param {string} name
+	 * @param {any} value
+	 */
+	async createStateCorrectType(key, id, name, value) {
+
+		if (key === 'cpuload') {
+			await this.createStatisticObjectNumber(id, _(name), '%');
+			await this.setStateAsync(id, value[0], true);
+
+		} else if (stringValues.includes(key)) {
+			await this.createStatisticObjectString(id, _(name));
+			await this.setStateAsync(id, value, true);
+
+		} else if (bytesToMB.includes(key)) {
+			await this.createStatisticObjectNumber(id, _(name), 'MB');
+			await this.setStateAsync(id, Math.round(value / 1024 / 1024 * 100) / 100, true);
+
+		} else if (bytesToGB.includes(key)) {
+			await this.createStatisticObjectNumber(id, _(name), 'GB');
+			await this.setStateAsync(id, Math.round(value / 1024 / 1024 / 1024 * 100) / 100, true);
+
+		} else if (kBytesToGB.includes(key)) {
+			await this.createStatisticObjectNumber(id, _(name), 'GB');
+			await this.setStateAsync(id, Math.round(value / 1024 / 1024 * 100) / 100, true);
+
+		} else if (typeof value === 'object') {
+			await this.createStatisticObjectString(id, _(name));
+			await this.setStateAsync(id, JSON.stringify(value), true);
+
+		} else {
+			if (isNaN(value)) {
+				await this.createStatisticObjectString(id, _(name));
+				await this.setStateAsync(id, value, true);
+
+			} else {
+				await this.createStatisticObjectNumber(id, _(name), '');
+				await this.setStateAsync(id, value, true);
 			}
 		}
 	}
@@ -247,9 +289,20 @@ class Nextcloud extends utils.Adapter {
 				availableData[name] = [];
 			}
 
-			for (const key of Object.keys(obj)) {
+			for (const [key, value] of Object.entries(obj)) {
 				if ((blacklist[name] && !blacklist[name].includes(key)) || !blacklist[name]) {
-					availableData[name].push(key);
+
+					if (typeof value === 'object') {
+						if ((objectblacklist[name] && !objectblacklist[name].includes(key)) || !objectblacklist[name]) {
+							for (const [subkey, subValue] of Object.entries(value)) {
+								availableData[name].push(`${key}.${subkey}`);
+							}
+						} else {
+							availableData[name].push(key);
+						}
+					} else {
+						availableData[name].push(key);
+					}
 				}
 			}
 		}
@@ -259,11 +312,13 @@ class Nextcloud extends utils.Adapter {
 		let connection = await this.checkConnection();
 
 		if (connection && connection.isConnected && connection.client) {
-			this.log.info('Connection to Nextcloud successful. Loading data...');
+
 
 
 			// this.log.warn('System Infos');
 			// this.log.info(JSON.stringify(connection.systemInfos.nextcloud));
+
+			// this.log.info(JSON.stringify(connection.systemInfos.server));
 
 			// let systemBasicData = await connection.client.getSystemBasicData();
 			// this.log.info(JSON.stringify(systemBasicData));
@@ -304,9 +359,9 @@ class Nextcloud extends utils.Adapter {
 			// let userDetailsByID = await connection.client.getUserDetailsByID('Scrounger');
 			// this.log.info(JSON.stringify(userDetailsByID));
 
-			let test = await connection.client.getUserIDs();
+			// let test = await connection.client.getUserIDs();
 
-			this.log.info(JSON.stringify(test));
+			// this.log.info(JSON.stringify(test));
 		}
 	}
 
@@ -373,10 +428,10 @@ class Nextcloud extends utils.Adapter {
 
 
 	/**
- * @param {string} id
- * @param {string} name
- * @param {any} unit
- */
+	* @param {string} id
+	* @param {string} name
+	* @param {any} unit
+	*/
 	async createStatisticObjectNumber(id, name, unit) {
 		let obj = await this.getObjectAsync(id);
 

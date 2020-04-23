@@ -41,14 +41,46 @@ function load(settings, onChange) {
             property: 'shares',
             defaults: ["num_shares", "num_shares_user", "num_shares_groups", "num_shares_link"],
             parentContainerId: 'container_shares'
+        },
+        {
+            // shares
+            id: `${myNamespace}.info`,
+            property: 'apps',
+            defaults: ["num_installed", "num_updates_available", "app_updates"],
+            parentContainerId: 'container_apps'
         }
+
     ]
+
+    // example: select elements with id=key and class=value and insert value
+    if (!settings) return;
+    $('.value').each(function () {
+        var $key = $(this);
+        var id = $key.attr('id');
+        if ($key.attr('type') === 'checkbox') {
+            // do not call onChange direct, because onChange could expect some arguments
+            $key.prop('checked', settings[id])
+                .on('change', () => onChange())
+                ;
+        } else {
+            // do not call onChange direct, because onChange could expect some arguments
+            $key.val(settings[id])
+                .on('change', function () {
+                    if (id === 'sqlInstance') showHideSettings();
+                    onChange()
+                })
+                .on('keyup', () => onChange())
+                ;
+        }
+    });
 
     for (const options of checkboxLists) {
         generateCheckboxList(options, settings, onChange)
     }
 
     eventsHandler();
+
+    showHideSettings();
 
     onChange(false);
 
@@ -70,6 +102,17 @@ function eventsHandler() {
     });
 }
 
+function showHideSettings() {
+    $("[id*=enable]").each(function () {
+        let key = $(this).attr('id').replace('enable', '').toLowerCase();
+
+        if ($(this).prop('checked') === true) {
+            $(`#container_${key}`).show();
+        } else {
+            $(`#container_${key}`).hide();
+        }
+    });
+}
 
 // This will be called by the admin adapter when the user presses the save button
 function save(callback) {
@@ -218,10 +261,17 @@ function generateCheckboxList(options, settings, onChange) {
 
                     for (const datapoint of availableDatapoints) {
                         if (options.ignores && !options.ignores.includes(datapoint) || !options.ignores) {
+
+                            let translation = _(datapoint);
+                            if (datapoint.includes('.')) {
+                                let split = datapoint.split('.');
+                                translation = `${_(split[0])}: ${_(split[1])}`
+                            }
+
                             checkboxElementsList.push(
                                 `<label class="col s4 input-field checkbox_list_item">
                                     <input type="checkbox" class="${options.property}_checkbox_item" ${settings[options.property].indexOf(datapoint) !== -1 ? 'checked ' : ''} data-info="${datapoint}" />
-                                    <span class="black-text">${_(datapoint)}</span>
+                                    <span class="black-text">${translation}</span>
                                 </label>`
                             )
                         }
