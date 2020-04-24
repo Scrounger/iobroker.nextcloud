@@ -85,6 +85,8 @@ For later updates, the above procedure is not necessary. Just do the following:
 
 ## Changelog
 
+### __WORK IN PROGRESS__
+
 ### 0.0.1
 * (Scrounger) initial release
 

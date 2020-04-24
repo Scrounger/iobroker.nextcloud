@@ -141,10 +141,6 @@ class Nextcloud extends utils.Adapter {
 		if (connection.isConnected && connection.client) {
 			availableData = {};
 
-			// this.getAvailableDataServerInfos(connection);
-			// this.getAvailableDataSystemInfos(connection);
-			// this.getAvailableDataStorageInfos(connection);
-
 			this.getAvailableDataFromObject(connection.systemInfos.server, 'server');
 
 			this.getAvailableDataFromObject(connection.systemInfos.nextcloud.system, 'system');
@@ -204,7 +200,6 @@ class Nextcloud extends utils.Adapter {
 		if (obj) {
 			for (const [key, value] of Object.entries(obj)) {
 				if (this.config[propName].includes(key) && this.config[`enable${propName}`]) {
-					// Ausnahmen
 					// this.log.info(key);
 					await this.createStateCorrectType(key, `${idPrefix}${propName}.${key.toLowerCase()}`, key, value);
 
