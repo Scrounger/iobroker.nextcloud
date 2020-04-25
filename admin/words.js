@@ -587,4 +587,6 @@ try {
 	systemDictionary = dictionary;
 } catch (ignore) { }
 
+try {
 module.exports = dictionary;
+} catch (ignore) { }

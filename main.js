@@ -319,13 +319,13 @@ class Nextcloud extends utils.Adapter {
 			// this.log.info(JSON.stringify(systemBasicData));
 
 			// this.log.warn('Notification');
-			// let notifications = await connection.client.getNotifications();
-			// this.log.info(JSON.stringify(notifications));
+			let notifications = await connection.client.getNotifications();
+			this.log.info(JSON.stringify(notifications));
 
 
 
-			// let updateNotifications = await connection.client.getUpdateNotifications(connection.systemInfos.nextcloud.system['version']);
-			// this.log.info(JSON.stringify(updateNotifications));
+			let updateNotifications = await connection.client.getUpdateNotifications(connection.systemInfos.nextcloud.system['version']);
+			this.log.info(JSON.stringify(updateNotifications));
 
 			// await connection.client.sendNotificationToUser('Scrounger', 'Nachricht', "Now was langes hinter her!");
 

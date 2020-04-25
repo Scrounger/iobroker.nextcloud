@@ -10,6 +10,8 @@
 
 [![NPM](https://nodei.co/npm/iobroker.nextcloud.png?downloads=true)](https://nodei.co/npm/iobroker.nextcloud/)
 
+**Tests:**: [![Travis-CI](http://img.shields.io/travis/Scrounger/ioBroker.linkeddevices/master.svg)](https://travis-ci.org/Scrounger/ioBroker.nextcloud)
+
 ## nextcloud adapter for ioBroker
 
 tbd
